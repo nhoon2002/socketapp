@@ -28,10 +28,11 @@ io.on("connection", socket => {
     console.log("New client connected");
 
     //Here we listen on a new namespace called "incoming data"
-    socket.on("incoming data", (data)=>{
-      console.log(data);
-        //Here we broadcast it out to all other sockets EXCLUDING the socket which sent us the data
-       socket.broadcast.emit("outgoing data", {num: data});
+    socket.on("outgoing alert", (data)=>{
+      socket.broadcast.emit('new message', data);
+    });
+    socket.on("new message", (data) => {
+      socket.emit('new message inc', data);
     });
 
     //A special namespace "disconnect" for when a client disconnects

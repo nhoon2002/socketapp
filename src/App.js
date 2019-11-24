@@ -1,21 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-let socket = require('socket.io-client')('http://127.0.0.1:8080');
+
+const url = window.location.hostname + ':8080';
+
+// Note the url parameter used below needs to point to the address of the express server.
+let socket = require('socket.io-client')(url);
 
 function App(){
   const [name, setName] = useState("");
-  const [greeting, setGreeting] = useState();
-
+  const [greeting, setGreeting] = useState(['Messages']);
+  const [message, setMessage] = useState();
   const handleSubmit = (event) => {
     event.preventDefault();
-    socket.emit('incoming data',
-  'hey');
-    fetch(`/api/ping?name=${encodeURIComponent(name)}`)
-      .then(response => response.json())
-      .then(greeting => setGreeting(greeting.greeting));
-
+    socket.emit('outgoing alert', message);
+    let alert = "Your last message: " + message;
   }
+  socket.on('new message inc', (data) => {
+    setGreeting(old => [...old, data]);
+    console.log(greeting);
+  })
+  useEffect(() => {
+
+  });
 
 
   return (
@@ -26,16 +33,20 @@ function App(){
             Edit <code>src/App.js</code> and save to reload.
           </p>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="name">Enter your name: </label>
+            <label htmlFor="name">Enter your messsage: </label>
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              value={message}
+              onChange={e => setMessage(e.target.value)}
             />
             <button type="submit">Submit</button>
           </form>
-          <p>{greeting}</p>
+          <ul>
+            {greeting.map((k) => (
+              <li key={k}>{greeting[k]}</li>
+            )) }
+          </ul>
           <a
             className="App-link"
             href="https://reactjs.org"
